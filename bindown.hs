@@ -81,6 +81,19 @@ bowl :: [Lump] -> Container
 bowl ls = Container (Range 500 800) (Range 720 900) ls "bowl"
 
 
+-- So I'd like to be able to say that a _solution_ has a type [Lump] -> ([Container], [Lump]) 
+-- the idea being that a solution is a function that takes in the list of Lumps and 
+-- returns the list of the produced Containers and the possible overflow Lumps.
+-- But so far I was only express to express something faintly like this in 
+-- this kludge:
+class BinDownSolution l where
+    solution :: [l] -> ([Container], [l]) 
+
+-- Everything is overflow here 
+instance BinDownSolution Lump where
+    solution ls = ([bin []], ls)
+
+
 -- Some test data
 bin1 = bin [(Lump "l1" 10 29), (Lump "l2" 20 30)]
 bin2 = bin [(Lump "l3" 44 55), (Lump "l4" 77 66)]
