@@ -17,12 +17,12 @@ instance Range2 Integer where
 -- /My own range experiments which are not actually needed for now
 
 
--- This makes the [bin1..] syntax possible. However it can only create empty bins...
--- I wonder though how necessary this is ; maybe we can just do (repeat (createEmpty bin)) instead.
+-- This makes the [bin1..] syntax possible. However it can only create empty bins and not bowls...
+-- I wonder though how necessary this is ; maybe we can just do (repeat (createOneEmpty bin)) instead.
 instance Enum Container where
-    toEnum n = createEmpty bin
+    toEnum n = createOneEmpty bin
     fromEnum c = 1
-    enumFrom c = c : enumFrom (createEmpty bin)
+    enumFrom c = c : enumFrom (createOneEmpty bin)
 
 data Lump = Lump {
     id     :: String
@@ -95,8 +95,11 @@ bin ls = Container (Range 450 900) (Range 160 210) ls "bin"
 bowl :: [Lump] -> Container
 bowl ls = Container (Range 500 800) (Range 720 900) ls "bowl"
 
-createEmpty :: ([Lump] -> Container) -> Container
-createEmpty x = x []
+createOneEmpty :: ([Lump] -> Container) -> Container
+createOneEmpty x = x []
+
+createEmpty :: Int -> ([Lump] -> Container) -> [Container]
+createEmpty n cc = take n $ repeat $ createOneEmpty cc
 
 
 -- A solution is a function that takes in the list of available Containers and
@@ -139,12 +142,12 @@ v2 = "addition on bowl1: 680 == " ++ show (containerVolume (add (bowl1) (Lump "n
 f1 = "does huge lump fit to bin1: False == " ++ show (lumpFitsIn bin1 (hugeLump))
 f2 = "does small lump fit to bin1: True == " ++ show (lumpFitsIn bin1 (smallLump))
 
-c1 = "creating new bins with enum: 97 == " ++ show (length (take 97 [createEmpty bin..]))
+c1 = "creating new bins with enum: 97 == " ++ show (length (createEmpty 97 bin))
 
-of1 = "Everything stays in overflow when trying to pack hugeLump: 3 == " ++ show (length (snd (greedyPacking (take 10 [createEmpty bin..], (hugeLump : contents bin1)))))
-of2 = "Overflow is empty when packing reasonable stuff: 0 == " ++ show (length (snd (greedyPacking (take 10 [createEmpty bin..], (contents bin1)))))
-of3 = "Individual 1-sized lumps fit to bin: 1000-210 = 790 == " ++ show (length (snd (greedyPacking ((take 10 [createEmpty bin..]), thousandSmallLumps))))
-of4 = "Individual 1-sized lumps fit to bowl: 1000-800 = 200 == " ++ show (length (snd (greedyPacking ((take 10 [createEmpty bowl..]), thousandSmallLumps))))
+of1 = "Everything stays in overflow when trying to pack hugeLump: 3 == " ++ (show $ length $snd (greedyPacking (take 10 $ repeat $ createOneEmpty bin, (hugeLump : contents bin1))))
+of2 = "Overflow is empty when packing reasonable stuff: 0 == " ++ show (length (snd (greedyPacking (take 10 $ repeat $ createOneEmpty bin, (contents bin1)))))
+of3 = "Individual 1-sized lumps fit to bin: 1000-210 = 790 == " ++ show (length (snd (greedyPacking (take 10 $ repeat $ createOneEmpty bin, thousandSmallLumps))))
+of4 = "Individual 1-sized lumps fit to bowl: 1000-800 = 200 == " ++ show (length (snd (greedyPacking (take 10 $ repeat $ createOneEmpty bowl, thousandSmallLumps))))
 
 testOutput = foldl step "" [w1, v1, v2, f1, f2, c1, of1, of2, of3, of4]
   where step acc s = acc ++ "\n" ++ s ++ "\n"
