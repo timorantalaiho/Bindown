@@ -72,6 +72,9 @@ isWithinLimits c = isFullEnough c && isSmallEnough c
 add :: Container -> Lump -> Container
 add c l = Container (volumeLimits c) (weightLimits c) (l : contents c) (name c)
 
+addAll :: Container -> [Lump] -> Container
+addAll c ls = Container (volumeLimits c) (weightLimits c) (ls ++ contents c) (name c)
+
 -- The two container types that we want to use
 bin :: [Lump] -> Container
 bin ls = Container (Range 450 900) (Range 160 210) ls "bin"
@@ -101,7 +104,9 @@ greedyPacking :: Solution
 greedyPacking (cs, []) = (cs, [])
 greedyPacking (cs, ls) = let firstLump = head ls
                              firstContainer = head cs
-			 in if (lumpFitsIn (firstContainer) firstLump)
+			 in if not $ isFullEnough (addAll firstContainer ls)
+                         then (cs, ls)
+                         else if (lumpFitsIn (firstContainer) firstLump)
 			 then greedyPacking ( (add firstContainer firstLump) : (tail cs), tail ls)
 			 else (cs, ls)
 
@@ -129,7 +134,7 @@ f2 = "does small lump fit to bin1: True == " ++ show (lumpFitsIn bin1 (smallLump
 c1 = "creating new bins with enum: 97 == " ++ show (length (createEmpty 97 bin))
 
 of1 = "Everything stays in overflow when trying to pack hugeLump: 3 == " ++ (show $ length $snd (greedyPacking (createEmpty 10 bin, (hugeLump : contents bin1))))
-of2 = "Overflow is empty when packing reasonable stuff: 0 == " ++ show (length (snd (greedyPacking (createEmpty 10 bin, (contents bin1)))))
+of2 = "Everything stays in overflow if minimum is not satisified: 2 == " ++ show (length (snd (greedyPacking (createEmpty 10 bin, (contents bin1)))))
 of3 = "Individual 1-sized lumps fit to bin: 1000-210 = 790 == " ++ show (length (snd (greedyPacking (createEmpty 10 bin, thousandSmallLumps))))
 of4 = "Individual 1-sized lumps fit to bowl: 1000-800 = 200 == " ++ show (length (snd (greedyPacking (createEmpty 10 bowl, thousandSmallLumps))))
 
