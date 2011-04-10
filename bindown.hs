@@ -8,22 +8,6 @@ data Range t = Range {
   } deriving (Show, Eq, Ord)
 
 
--- My own Ord experiments which are not actually needed for now
-class Ord a => Range2 a where
-    contains :: Range a -> a -> Bool
-
-instance Range2 Integer where
-    contains r x = x >= start r && x <= end r
--- /My own range experiments which are not actually needed for now
-
-
--- This makes the [bin1..] syntax possible. However it can only create empty bins and not bowls...
--- I wonder though how necessary this is ; maybe we can just do (repeat (createOneEmpty bin)) instead.
-instance Enum Container where
-    toEnum n = createOneEmpty bin
-    fromEnum c = 1
-    enumFrom c = c : enumFrom (createOneEmpty bin)
-
 data Lump = Lump {
     id     :: String
   , volume :: Volume
@@ -144,10 +128,10 @@ f2 = "does small lump fit to bin1: True == " ++ show (lumpFitsIn bin1 (smallLump
 
 c1 = "creating new bins with enum: 97 == " ++ show (length (createEmpty 97 bin))
 
-of1 = "Everything stays in overflow when trying to pack hugeLump: 3 == " ++ (show $ length $snd (greedyPacking (take 10 $ repeat $ createOneEmpty bin, (hugeLump : contents bin1))))
-of2 = "Overflow is empty when packing reasonable stuff: 0 == " ++ show (length (snd (greedyPacking (take 10 $ repeat $ createOneEmpty bin, (contents bin1)))))
-of3 = "Individual 1-sized lumps fit to bin: 1000-210 = 790 == " ++ show (length (snd (greedyPacking (take 10 $ repeat $ createOneEmpty bin, thousandSmallLumps))))
-of4 = "Individual 1-sized lumps fit to bowl: 1000-800 = 200 == " ++ show (length (snd (greedyPacking (take 10 $ repeat $ createOneEmpty bowl, thousandSmallLumps))))
+of1 = "Everything stays in overflow when trying to pack hugeLump: 3 == " ++ (show $ length $snd (greedyPacking (createEmpty 10 bin, (hugeLump : contents bin1))))
+of2 = "Overflow is empty when packing reasonable stuff: 0 == " ++ show (length (snd (greedyPacking (createEmpty 10 bin, (contents bin1)))))
+of3 = "Individual 1-sized lumps fit to bin: 1000-210 = 790 == " ++ show (length (snd (greedyPacking (createEmpty 10 bin, thousandSmallLumps))))
+of4 = "Individual 1-sized lumps fit to bowl: 1000-800 = 200 == " ++ show (length (snd (greedyPacking (createEmpty 10 bowl, thousandSmallLumps))))
 
 testOutput = foldl step "" [w1, v1, v2, f1, f2, c1, of1, of2, of3, of4]
   where step acc s = acc ++ "\n" ++ s ++ "\n"
