@@ -23,27 +23,28 @@ data Container = Container {
   } deriving (Show, Eq)
 
 
-total :: [Lump] -> (Lump -> Integer) -> Integer -> Integer
-total ls f z = foldl step z ls
-    where step acc l = acc + f l
+
+total :: (Lump -> Integer) -> Integer -> [Lump] -> Integer
+total f z ls = foldl step z ls
+     where step acc l = acc + f l
 
 totalVolume :: [Lump] -> Volume
-totalVolume ls = total ls volume 0 
+totalVolume = total volume 0 
 
 totalWeight :: [Lump] -> Weight
-totalWeight ls = total ls weight 0 
+totalWeight = total weight 0 
 
 containerVolume :: Container -> Volume
-containerVolume c = totalVolume (contents c)
+containerVolume = totalVolume . contents
 
 containerWeight :: Container -> Weight
-containerWeight c = totalWeight (contents c)
+containerWeight = totalWeight . contents
 
 maxVolume :: Container -> Volume
-maxVolume c = end (volumeLimits c)
+maxVolume = end . volumeLimits
 
 maxWeight :: Container -> Weight
-maxWeight c = end (weightLimits c)
+maxWeight = end . weightLimits
 
 freeCapacity :: Container -> (Volume, Weight)
 freeCapacity c = ( ((maxVolume c) - containerVolume c), 
@@ -51,10 +52,9 @@ freeCapacity c = ( ((maxVolume c) - containerVolume c),
                  )
 
 fitsIn :: Volume -> Weight -> Container -> Bool
-fitsIn v w c = let free = freeCapacity c
-               in if (fst free >= v && snd free >= w) 
-               then True
-               else False
+fitsIn v w c = let (freeVol, freeWeight) = freeCapacity c                       
+               in freeVol >= v && freeWeight >= w                               
+
 
 lumpFitsIn :: Container -> Lump -> Bool
 lumpFitsIn c l = fitsIn (volume l) (weight l) c
