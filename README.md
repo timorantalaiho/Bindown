@@ -37,3 +37,14 @@ cannot fit the third Lump to the same bowl, and it alone cannot satisfy
 the minimum weight nor volume of the bowl, so it is left as overflow. In
 case of overflow, it is desired to be as small as possible.
 
+
+Instructions
+------------
+
+Install QuickCheck for example with Cabal
+
+    cabal update && cabal install QuickCheck
+
+Note: On my 64-bit Ubuntu, for some reason I had to get some 32-bit 
+library files according to [these instructions](http://devkitpro.org/viewtopic.php?f=2&t=59).
+
